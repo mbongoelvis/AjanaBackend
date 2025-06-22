@@ -1,8 +1,7 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import users from "../models/users.js";
-import { byte } from "webidl-conversions";
-import { createToken } from "../middelwares/createToken.js";
+import { createToken } from "../helper/createToken.js";
 
 // login
 export const login = async (req, res) => {
@@ -20,7 +19,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Account not found create one" });
     }
     //   compare the passwords from that of the hashed password
-    const comparePassword = await bcrypt.compare(password, findEmail.password);
+    const comparePassword = bcrypt.compare(password, findEmail.password);
     //   if the password matches
     if (!comparePassword) {
       return res.status(400).json({ message: "wrong cridentailas try again" });
@@ -67,14 +66,15 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Error creating user" });
     }
     //   create an access token using the userId and role
-    const signupToken = await createToken(saveUser._id, saveUser.role);
-    if (!signupToken) {
-      return res.status(400).json({ message: "Error creating token" });
-    }
+    // this is optional, but if you want to implement this then uncomment this code
+    // const signupToken = await createToken(saveUser._id, saveUser.role);
+    // if (!signupToken) {
+    //   return res.status(400).json({ message: "Error creating token" });
+    // }
     //   send the accesss token
     return res
       .status(201)
-      .json({ message: "Account created successfully", signupToken });
+      .json({ message: "Account created successfully" });
   } catch (error) {
     return res.status(400).json({ message: "Internal server error" });
   }

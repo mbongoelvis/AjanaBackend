@@ -4,7 +4,6 @@ import users from "../models/users.js";
 export const validateAuthorization = async (req, res, next) => {
   const decoded = req.user;
           try {
-            console.log(decoded);
     // first check if the id is a valid mongodb id
     if (!mongoose.Types.ObjectId.isValid(decoded.userId)) {
       return res.status(400).json({ messge: "invalid mongodb Id" });

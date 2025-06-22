@@ -1,4 +1,4 @@
-import express from "express";
+import express from "express"
 // this helps to log in the terminal when a user access and endpoint
 import morgan from "morgan";
 // this helps to secure the headers
@@ -8,6 +8,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/dbConnection.js";
 import userRouter from "./routes/user.js";
+import subscriberRouter from "./routes/subscriber.js";
+import blogRouter from "./routes/blog.js";
 
 // invocking dotenv
 dotenv.config();
@@ -31,6 +33,8 @@ app.use(morgan("dev"));
 
 // backend routes
 app.use("/api/auth", userRouter);
+app.use("/api/subscriber", subscriberRouter);
+app.use("/api/blog", blogRouter);
 
 // creating the server
 app.listen(port, () => {

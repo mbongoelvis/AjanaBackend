@@ -6,7 +6,7 @@ export const validateToken = (req, res, next) => {
     // Get the token from the Authorization header
     const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return res.status(401).json({ message: "Unauthorized" });
+          return res.status(401).json({ message: "Unauthorized check token formatting" });
         }
     const token = authHeader.split(" ")[1];
     // Verify the token
