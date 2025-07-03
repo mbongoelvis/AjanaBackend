@@ -6,7 +6,7 @@ const subscriberRouter = express.Router();
 // create subscriber
 subscriberRouter.post("/", addSubscriber)
 // delete subscriber
-subscriberRouter.delete("/", deleteSubscriber)
+subscriberRouter.delete("/:id", deleteSubscriber)
 // get all subscribers
 subscriberRouter.get("/getall", getAllSubscribers)
 

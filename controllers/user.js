@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import users from "../models/users.js";
 import { createToken } from "../helper/createToken.js";
 
-// login
+// ========= login =========
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -19,16 +19,15 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Account not found create one" });
     }
     //   compare the passwords from that of the hashed password
-    const comparePassword = bcrypt.compare(password, findEmail.password);
+    const comparePassword = await bcrypt.compare(password, findEmail.password);
     //   if the password matches
     if (!comparePassword) {
       return res.status(400).json({ message: "wrong cridentailas try again" });
     }
-
     //   create an access token using the userId and role
-    const loginToken = await createToken(findEmail._id, findEmail.role);
+    const Token = await createToken(findEmail._id, findEmail.role);
     //   send the accesss token
-    return res.status(200).json({ message: "welcome back", loginToken });
+    return res.status(200).json({ Token });
   } catch (error) {
     return res.status(400).json({ message: "Internal server error" });
   }
@@ -37,19 +36,18 @@ export const login = async (req, res) => {
 // =========== create an account ==========
 export const signup = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, username, role } = req.body;
     // check if email and password are provided
-    if (!email || !password) {
+    if (!email || !password || !role || !username) {
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "All fields are required" });
     }
     //   find the email if already exist or not
     const findEmail = await users.findOne({ email });
     if (findEmail) {
       return res.status(400).json({ message: "Account already in use" });
     }
-
     //   hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
     if (!hashedPassword) {
@@ -58,20 +56,15 @@ export const signup = async (req, res) => {
     //   create a new user
     const newUser = new users({
       email,
-      password: hashedPassword, // default role
+      username,
+      role,
+      password: hashedPassword,
     });
     //   saving the user
     const saveUser = await newUser.save();
     if (!saveUser) {
       return res.status(400).json({ message: "Error creating user" });
     }
-    //   create an access token using the userId and role
-    // this is optional, but if you want to implement this then uncomment this code
-    // const signupToken = await createToken(saveUser._id, saveUser.role);
-    // if (!signupToken) {
-    //   return res.status(400).json({ message: "Error creating token" });
-    // }
-    //   send the accesss token
     return res
       .status(201)
       .json({ message: "Account created successfully" });
@@ -80,7 +73,7 @@ export const signup = async (req, res) => {
   }
 };
 
-// =========== get an account by id ==========
+// =========== Get an account by id ==========
 export const getAccountById = async (req, res) => {
   //   this is the id of the account we want to get
   const { id } = req.params;
@@ -103,3 +96,66 @@ export const getAccountById = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+// ======== Get all accounts =========
+export const getAllAdmins = async (req, res) => {
+  try {
+    const allAccounts = await users.find().select("-__v -password"); 
+    return res.status(200).json(allAccounts);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+// ========== Delete admin ============
+export const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params
+    // check if the id is a valid mongodb id
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({message: "Invalid mongodb id"})
+    }
+    // find the account
+    const findAccount = await users.findById({_id: id})
+    if (!findAccount) {
+      return res.status(400).json({message: "Account not found"})
+    }
+    // delete the account
+    const deleteAccount = await users.findByIdAndDelete({_id: id})
+    if (!deleteAccount) {
+      return res.status(400).json({message: "Error deleting account"})
+    }
+    return res.status(200).json({message: "Account deleted successfully"})
+  } catch (error) {
+    return res.status(500).json({message: "Internal server error"})
+  }
+}
+
+// ========== Update account ============
+export const updateAccount = async (req, res) => { 
+  try {
+    const { id } = req.params;
+    const { email, username, role } = req.body;
+    // check if the id is a valid mongodb id
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid mongodb id" });
+    }
+    // find the account
+    const findAccount = await users.findById({ _id: id });
+    if (!findAccount) {
+      return res.status(400).json({ message: "Account not found" });
+    }
+    // update the account
+    const updatedAccount = await users.findByIdAndUpdate(
+      { _id: id },
+      { email, username, role },
+      { new: true }
+    );
+    if (!updatedAccount) {
+      return res.status(400).json({ message: "Error updating account" });
+    }
+    return res.status(200).json({ message: "Account updated successfully",updatedAccount });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}

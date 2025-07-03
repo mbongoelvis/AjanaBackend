@@ -5,12 +5,14 @@ import { validateToken } from "../middelwares/validateToken.js";
 
 const blogRouter = express.Router()
 
-// create blog
-blogRouter.post("/", validateToken, validateAdmin, addBlog);
+// validateToken,
+//   validateAdmin,
+  // create blog
+  blogRouter.post("/", addBlog);
 // delete blog
-blogRouter.delete("/:id", validateToken, validateAdmin, deleteBlog);
+blogRouter.delete("/:id", deleteBlog);
 // update blog
-blogRouter.put("/:id", validateToken, validateAdmin, updateBlog);
+blogRouter.put("/:id", updateBlog);
 // get all blog
 blogRouter.get("/", getAllBlogs);
 // get a single blog

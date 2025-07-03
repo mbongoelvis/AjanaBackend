@@ -3,11 +3,7 @@ import mongoose from "mongoose";
 // creating the user schema
 const userSchema = new mongoose.Schema(
   {
-    firstname: {
-      type: String,
-      require: true,
-    },
-    lastname: {
+    username: {
       type: String,
       require: true,
     },
@@ -19,9 +15,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       require: true,
-    },
-    profilePicture: {
-      type: String,
     },
     role: {
       type: String,

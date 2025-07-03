@@ -1,3 +1,4 @@
+import { mongo } from "mongoose";
 import subscribers from "../models/subscribers.js";
 
 // create subscriber
@@ -30,13 +31,17 @@ export const addSubscriber = async (req, res) => {
 // delete subscriber
 export const deleteSubscriber = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: "email is require" });
+    const { id } = req.params;
+    if(!id) {
+      return res.status(400).json({ message: "id is required" });
     }
+    //   check if the id is a valid mongodb id
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "invalid Id" });
+    } 
     //   first find the email if it exist or not
-    const findEmail = await subscribers.findOneAndDelete({ email: email });
-    if (!findEmail) {
+    const findEmailById = await subscribers.findOneAndDelete({ _id: id });
+    if (!findEmailById) {
       return res.status(400).json({ message: "email not found" });
     }
     return res.status(200).json({ message: "email deleted successfully" });
