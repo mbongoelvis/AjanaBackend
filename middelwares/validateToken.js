@@ -19,7 +19,7 @@ export const validateToken = (req, res, next) => {
         }
       }
       // Attach the user information to the request object
-      req.user = decoded;
+      req.userId = decoded.userId;
       next();
     });
   } catch (error) {

@@ -1,12 +1,8 @@
 import express from "express"
 import { addBlog, getAllBlogs, getBlog, updateBlog, deleteBlog } from "../controllers/blog.js";
-import { validateAdmin } from "../middelwares/validateAdmin.js";
-import { validateToken } from "../middelwares/validateToken.js";
 
 const blogRouter = express.Router()
 
-// validateToken,
-//   validateAdmin,
   // create blog
   blogRouter.post("/", addBlog);
 // delete blog

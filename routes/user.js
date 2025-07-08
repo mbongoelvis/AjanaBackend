@@ -1,7 +1,6 @@
 import express from "express";
 import { login, signup, deleteAdmin, getAllAdmins,getAccountById, updateAccount } from "../controllers/user.js";
 import { validateToken } from "../middelwares/validateToken.js";
-import { validateAuthorization } from "../middelwares/validateAuthorization.js";
 
 const userRouter = express.Router();
 
@@ -9,8 +8,8 @@ const userRouter = express.Router();
 userRouter.post("/", login);
 // signup
 userRouter.post("/signup", signup);
-// get an account
-userRouter.get("/:id", validateToken, validateAuthorization, getAccountById);
+// validate token
+userRouter.get("/validateToken", validateToken, getAccountById);
 // get all accounts
 userRouter.get("/", getAllAdmins);
 // update account

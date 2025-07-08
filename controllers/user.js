@@ -75,23 +75,24 @@ export const signup = async (req, res) => {
 
 // =========== Get an account by id ==========
 export const getAccountById = async (req, res) => {
-  //   this is the id of the account we want to get
-  const { id } = req.params;
   try {
     //   ========= // first check if the id is a valid mongodb id ======
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.userId)) {
+      console.log("issue here: id issue");
+
       return res.status(400).json({ messge: "invalid mongodb Id" });
     }
     //     find the account
     const findAccount = await users
-      .findById({ _id: id })
+      .findOne({ _id: req.userId })
       .select("-password -__v");
     if (!findAccount) {
+      console.log("issue here: find account");
       return res.status(400).json({ message: "account not found" });
     }
     return res
       .status(200)
-      .json({ message: "account detail", account: findAccount });
+      .json(findAccount);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

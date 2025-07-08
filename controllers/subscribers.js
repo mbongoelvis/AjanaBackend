@@ -1,4 +1,4 @@
-import { mongo } from "mongoose";
+import mongoose from "mongoose";
 import subscribers from "../models/subscribers.js";
 
 // create subscriber
@@ -30,22 +30,27 @@ export const addSubscriber = async (req, res) => {
 
 // delete subscriber
 export const deleteSubscriber = async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    if(!id) {
-      return res.status(400).json({ message: "id is required" });
+    if (!id) {
+      console.log("first");
+      return res.status(400).json({ message: "id is required" }); 
     }
     //   check if the id is a valid mongodb id
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log("second section");
       return res.status(400).json({ message: "invalid Id" });
     } 
     //   first find the email if it exist or not
     const findEmailById = await subscribers.findOneAndDelete({ _id: id });
     if (!findEmailById) {
+      console.log("third section");
       return res.status(400).json({ message: "email not found" });
     }
+    console.log("fourth section");
     return res.status(200).json({ message: "email deleted successfully" });
   } catch (err) {
+    console.log("last section");
     return res
       .status(500)
       .json({ message: "server error", error: err.message });
