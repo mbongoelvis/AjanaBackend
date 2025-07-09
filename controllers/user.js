@@ -39,9 +39,7 @@ export const signup = async (req, res) => {
     const { email, password, username, role } = req.body;
     // check if email and password are provided
     if (!email || !password || !role || !username) {
-      return res
-        .status(400)
-        .json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
     //   find the email if already exist or not
     const findEmail = await users.findOne({ email });
@@ -65,9 +63,7 @@ export const signup = async (req, res) => {
     if (!saveUser) {
       return res.status(400).json({ message: "Error creating user" });
     }
-    return res
-      .status(201)
-      .json({ message: "Account created successfully" });
+    return res.status(201).json({ message: "Account created successfully" });
   } catch (error) {
     return res.status(400).json({ message: "Internal server error" });
   }
@@ -90,9 +86,7 @@ export const getAccountById = async (req, res) => {
       console.log("issue here: find account");
       return res.status(400).json({ message: "account not found" });
     }
-    return res
-      .status(200)
-      .json(findAccount);
+    return res.status(200).json(findAccount);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -101,42 +95,17 @@ export const getAccountById = async (req, res) => {
 // ======== Get all accounts =========
 export const getAllAdmins = async (req, res) => {
   try {
-    const allAccounts = await users.find().select("-__v -password"); 
+    const allAccounts = await users.find().select("-__v -password");
     return res.status(200).json(allAccounts);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}
+};
 
 // ========== Delete admin ============
 export const deleteAdmin = async (req, res) => {
   try {
-    const { id } = req.params
-    // check if the id is a valid mongodb id
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({message: "Invalid mongodb id"})
-    }
-    // find the account
-    const findAccount = await users.findById({_id: id})
-    if (!findAccount) {
-      return res.status(400).json({message: "Account not found"})
-    }
-    // delete the account
-    const deleteAccount = await users.findByIdAndDelete({_id: id})
-    if (!deleteAccount) {
-      return res.status(400).json({message: "Error deleting account"})
-    }
-    return res.status(200).json({message: "Account deleted successfully"})
-  } catch (error) {
-    return res.status(500).json({message: "Internal server error"})
-  }
-}
-
-// ========== Update account ============
-export const updateAccount = async (req, res) => { 
-  try {
     const { id } = req.params;
-    const { email, username, role } = req.body;
     // check if the id is a valid mongodb id
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid mongodb id" });
@@ -146,17 +115,62 @@ export const updateAccount = async (req, res) => {
     if (!findAccount) {
       return res.status(400).json({ message: "Account not found" });
     }
-    // update the account
+    // delete the account
+    const deleteAccount = await users.findByIdAndDelete({ _id: id });
+    if (!deleteAccount) {
+      return res.status(400).json({ message: "Error deleting account" });
+    }
+    return res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ========== Update account ============
+export const updateAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, username, role, password } = req.body;
+
+    // Check if the id is a valid MongoDB id
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid MongoDB id" });
+    }
+
+    // Find the account
+    const findAccount = await users.findById(id);
+    if (!findAccount) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    // Prepare the update object
+    const updateData = {};
+    if (email) updateData.email = email;
+    if (username) updateData.username = username;
+    if (role) updateData.role = role;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      if (!hashedPassword) {
+        return res.status(500).json({ message: "Error hashing password" });
+      }
+      updateData.password = hashedPassword;
+    }
+
+    // Update the account
     const updatedAccount = await users.findByIdAndUpdate(
-      { _id: id },
-      { email, username, role },
+      id,
+      { $set: updateData },
       { new: true }
     );
+
     if (!updatedAccount) {
-      return res.status(400).json({ message: "Error updating account" });
+      return res.status(500).json({ message: "Error updating account" });
     }
-    return res.status(200).json({ message: "Account updated successfully",updatedAccount });
+
+    return res
+      .status(200)
+      .json(updatedAccount);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}
+};
